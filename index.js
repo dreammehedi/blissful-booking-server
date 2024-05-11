@@ -63,7 +63,8 @@ const run = async () => {
   try {
     await client.connect();
     // get database of created database
-    const hotelsDb = client.db("HotelsDB").collection("allHotels");
+    const hotelsRooms = client.db("RoomsDB").collection("allRoomsData");
+    const hotelsUserReviews = client.db("RoomsDB").collection("userReviews");
 
     // authentication user token route
     app.post("/signin", async (req, res) => {
@@ -87,7 +88,7 @@ const run = async () => {
 
     // hotels main routes
     app.get("/rooms", async (req, res) => {
-      const result = await hotelsDb.find().limit(5).toArray();
+      const result = await hotelsRooms.find().limit(5).toArray();
       res.send(result);
     });
 
@@ -95,10 +96,26 @@ const run = async () => {
     app.get("/room-detailes/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await hotelsDb.findOne(query);
+      const result = await hotelsRooms.findOne(query);
       res.send(result);
     });
 
+    // user reviews routes
+    app.get("/userReviews", async (req, res) => {
+      const result = await hotelsUserReviews
+        .aggregate([
+          {
+            $addFields: {
+              convertedTimestamp: { $toDate: "$timestamp" },
+            },
+          },
+          {
+            $sort: { convertedTimestamp: -1 },
+          },
+        ])
+        .toArray();
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
