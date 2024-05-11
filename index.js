@@ -88,7 +88,15 @@ const run = async () => {
 
     // hotels main routes
     app.get("/rooms", async (req, res) => {
-      const result = await hotelsRooms.find().limit(5).toArray();
+      const options = {
+        projection: {
+          name: 1,
+          description: 1,
+          image_url: 1,
+          price_per_night: 1,
+        },
+      };
+      const result = await hotelsRooms.find({}, options).limit(5).toArray();
       res.send(result);
     });
 
