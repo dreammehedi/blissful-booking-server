@@ -31,6 +31,23 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+// user verify tokens
+// const virifyUser = (req, res, next) => {
+//   const token = req.cookies.jwt;
+//   if (token) {
+//     jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+//       if (err) {
+//         res.status(401).json({ message: "Invalid Token" });
+//       } else {
+//         req.user = decodedToken;
+//         next();
+//       }
+//     });
+//   } else {
+//     res.status(401).json({ message: "Invalid Token" });
+//   }
+// };
+
 // create and app port
 const port = process.env.PORT || 5000;
 
@@ -123,6 +140,40 @@ const run = async () => {
         ])
         .toArray();
       res.send(result);
+    });
+
+    // all available room data get
+    app.get("/available-rooms", async (req, res) => {
+      // get current page
+      const page = parseInt(req.query.page);
+      // get limit
+      const limit = parseInt(req.query.limit);
+      // get skip
+      const skip = page * limit;
+
+      const query = { available: true };
+      const options = {
+        projection: {
+          name: 1,
+          description: 1,
+          image_url: 1,
+          price_per_night: 1,
+          available: 1,
+        },
+      };
+      const result = await hotelsRooms
+        .find(query, options)
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+      res.send(result);
+    });
+
+    // all available room count
+    app.get("/available-rooms-count", async (req, res) => {
+      const query = { available: true };
+      const result = await hotelsRooms.countDocuments(query);
+      res.send({ count: result });
     });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
