@@ -73,7 +73,14 @@ const run = async () => {
       });
       res
         .cookie("userToken", userToken, cookieOptions)
-        .send({ success: "Success Login." });
+        .send({ success: "User Sign In Success." });
+    });
+
+    // user signout clear cookies
+    app.post("/signout", (req, res) => {
+      res
+        .clearCookie("userToken", { ...cookieOptions, maxAge: 0 })
+        .send({ success: "User Signed Out Success." });
     });
 
     // Send a ping to confirm a successful connection
