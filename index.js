@@ -10,7 +10,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 // mongodb require
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 // json web token require
 const jwt = require("jsonwebtoken");
@@ -62,6 +62,8 @@ const client = new MongoClient(uri, {
 const run = async () => {
   try {
     await client.connect();
+    // get database of created database
+    const hotelsDb = client.db("HotelsDB").collection("allHotels");
 
     // authentication user token route
     app.post("/signin", async (req, res) => {
@@ -81,6 +83,20 @@ const run = async () => {
       res
         .clearCookie("userToken", { ...cookieOptions, maxAge: 0 })
         .send({ success: "User Signed Out Success." });
+    });
+
+    // hotels main routes
+    app.get("/rooms", async (req, res) => {
+      const result = await hotelsDb.find().limit(5).toArray();
+      res.send(result);
+    });
+
+    // room detailes data get
+    app.get("/room-detailes/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await hotelsDb.findOne(query);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
