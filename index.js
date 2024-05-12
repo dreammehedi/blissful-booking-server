@@ -117,6 +117,21 @@ const run = async () => {
       res.send(result);
     });
 
+    // get first room data
+    app.get("/first-room-banner", async (req, res) => {
+      const query = {
+        available: true,
+      };
+      const options = {
+        projection: {
+          name: 1,
+          description: 1,
+          image_url: 1,
+        },
+      };
+      const result = await hotelsRooms.findOne(query, options);
+      res.send(result);
+    });
     // room detailes data get
     app.get("/room-detailes/:id", async (req, res) => {
       const id = req.params.id;
@@ -144,14 +159,21 @@ const run = async () => {
 
     // all available room data get
     app.get("/available-rooms", async (req, res) => {
-      // get current page
-      const page = parseInt(req.query.page);
-      // get limit
-      const limit = parseInt(req.query.limit);
-      // get skip
-      const skip = page * limit;
+      let query;
+      // get price range
+      const priceRange = parseInt(req.query.priceRange);
 
-      const query = { available: true };
+      if (priceRange) {
+        query = {
+          available: true,
+          price_per_night: { $lte: priceRange },
+        };
+      } else {
+        query = {
+          available: true,
+        };
+      }
+
       const options = {
         projection: {
           name: 1,
@@ -161,20 +183,16 @@ const run = async () => {
           available: 1,
         },
       };
-      const result = await hotelsRooms
-        .find(query, options)
-        .skip(skip)
-        .limit(limit)
-        .toArray();
+      const result = await hotelsRooms.find(query, options).toArray();
       res.send(result);
     });
 
     // all available room count
-    app.get("/available-rooms-count", async (req, res) => {
-      const query = { available: true };
-      const result = await hotelsRooms.countDocuments(query);
-      res.send({ count: result });
-    });
+    // app.get("/available-rooms-count", async (req, res) => {
+    //   const query = { available: true };
+    //   const result = await hotelsRooms.countDocuments(query);
+    //   res.send({ count: result });
+    // });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
