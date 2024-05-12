@@ -142,21 +142,31 @@ const run = async () => {
 
     // user reviews routes
     app.get("/userReviews", async (req, res) => {
+      // const result = await hotelsUserReviews
+      //   .aggregate([
+      //     {
+      //       $addFields: {
+      //         convertedTimestamp: { $toDate: "$timestamp" },
+      //       },
+      //     },
+      //     {
+      //       $sort: { convertedTimestamp: -1 },
+      //     },
+      //   ])
+      //   .toArray();
+
       const result = await hotelsUserReviews
-        .aggregate([
-          {
-            $addFields: {
-              convertedTimestamp: { $toDate: "$timestamp" },
-            },
-          },
-          {
-            $sort: { convertedTimestamp: -1 },
-          },
-        ])
+        .find()
+        .sort({ timeStamp: -1 })
         .toArray();
       res.send(result);
     });
 
+    app.post("/room-review", async (req, res) => {
+      const userReview = req.body;
+      const result = await hotelsUserReviews.insertOne(userReview);
+      res.send(result);
+    });
     // all available room data get
     app.get("/available-rooms", async (req, res) => {
       let query;
