@@ -187,6 +187,21 @@ const run = async () => {
       res.send(result);
     });
 
+    // available room data update
+    app.patch("/available-rooms/:roomId", async (req, res) => {
+      const roomId = req.params.roomId;
+      const updateData = req.body;
+      const query = { _id: new ObjectId(roomId) };
+      const options = { upsert: true };
+      const updatedData = {
+        $set: {
+          available: updateData.available,
+          bookingDate: updateData.bookingDate,
+        },
+      };
+      const result = await hotelsRooms.updateOne(query, updatedData, options);
+      res.send(result);
+    });
     // all available room count
     // app.get("/available-rooms-count", async (req, res) => {
     //   const query = { available: true };
