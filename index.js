@@ -218,6 +218,21 @@ const run = async () => {
     //   const result = await hotelsRooms.countDocuments(query);
     //   res.send({ count: result });
     // });
+
+    // get data in database for user booked data
+    app.post("/user-booked-rooms", async (req, res) => {
+      const ids = req.body;
+      const newObjectId = ids.map((id) => new ObjectId(id));
+
+      const query = {
+        _id: {
+          $in: newObjectId,
+        },
+      };
+      const result = await hotelsRooms.find(query).toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
