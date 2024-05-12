@@ -233,6 +233,19 @@ const run = async () => {
       res.send(result);
     });
 
+    // update booked date
+    app.patch("/update-booked-date/:id", async (req, res) => {
+      const id = req.params.id;
+      const updateData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updatedData = {
+        $set: {
+          bookingDate: updateData.bookingDate,
+        },
+      };
+      const result = await hotelsRooms.updateOne(query, updatedData);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
