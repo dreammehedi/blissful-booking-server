@@ -246,6 +246,20 @@ const run = async () => {
       const result = await hotelsRooms.updateOne(query, updatedData);
       res.send(result);
     });
+
+    // booked room cancel
+    app.patch("/cancel-booked-room/:id", async (req, res) => {
+      const id = req.params.id;
+      const updateData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updatedData = {
+        $set: {
+          available: updateData.available,
+        },
+      };
+      const result = await hotelsRooms.updateOne(query, updatedData);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
