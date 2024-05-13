@@ -32,20 +32,20 @@ app.use(express.json());
 app.use(cookieParser());
 
 // user verify tokens
-const virifyUser = (req, res, next) => {
-  const token = req.cookies.userToken;
-  if (!token) {
-    return res.status(401).send({ message: "UnAuthorized!" });
-  }
+// const virifyUser = (req, res, next) => {
+//   const token = req.cookies.userToken;
+//   if (!token) {
+//     return res.status(401).send({ message: "UnAuthorized!" });
+//   }
 
-  jwt.verify(token, process.env.USER_SECRET_TOKEN, (err, decode) => {
-    if (err) {
-      return res.status(403).send({ message: "Forbidden!" });
-    }
-    req.userTokenDecode = decode;
-    next();
-  });
-};
+//   jwt.verify(token, process.env.USER_SECRET_TOKEN, (err, decode) => {
+//     if (err) {
+//       return res.status(403).send({ message: "Forbidden!" });
+//     }
+//     req.userTokenDecode = decode;
+//     next();
+//   });
+// };
 
 // create and app port
 const port = process.env.PORT || 5000;
@@ -219,12 +219,9 @@ const run = async () => {
     // });
 
     // get data in database for user booked data
-    app.post("/user-booked-rooms", virifyUser, async (req, res) => {
+    app.post("/user-booked-rooms", async (req, res) => {
       const ids = req.body;
 
-      if (req.query?.email !== req.userTokenDecode?.email) {
-        return res.status(401).send({ message: "UnAuthorized!" });
-      }
       const newObjectId = ids.map((id) => new ObjectId(id));
       const query = {
         _id: {
