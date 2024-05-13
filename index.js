@@ -225,15 +225,22 @@ const run = async () => {
     // });
 
     // get data in database for user booked data
-    app.post("/user-booked-rooms", async (req, res) => {
-      const ids = req.body;
+    // app.post("/user-booked-rooms", async (req, res) => {
+    //   const ids = req.body;
 
-      const newObjectId = ids.map((id) => new ObjectId(id));
-      const query = {
-        _id: {
-          $in: newObjectId,
-        },
-      };
+    //   const newObjectId = ids.map((id) => new ObjectId(id));
+    //   const query = {
+    //     _id: {
+    //       $in: newObjectId,
+    //     },
+    //   };
+    //   const result = await hotelsRooms.find(query).toArray();
+    //   res.send(result);
+    // });
+
+    app.post("/my-booking-room", async (req, res) => {
+      const userEmail = req.query.email;
+      const query = { userEmail: userEmail };
       const result = await hotelsRooms.find(query).toArray();
       res.send(result);
     });
