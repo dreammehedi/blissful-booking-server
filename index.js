@@ -82,7 +82,7 @@ const client = new MongoClient(uri, {
 // connect mongodb client
 const run = async () => {
   try {
-    // await client.connect();
+    await client.connect();
     // get database of created database
     const hotelsRooms = client.db("RoomsDB").collection("allRoomsData");
     const hotelsUserReviews = client.db("RoomsDB").collection("userReviews");
@@ -202,13 +202,14 @@ const run = async () => {
     });
 
     // available room data update
-    app.patch("/available-rooms/:roomId", async (req, res) => {
+    app.patch("/room-booked/:roomId", async (req, res) => {
       const roomId = req.params.roomId;
       const updateData = req.body;
       const query = { _id: new ObjectId(roomId) };
       const options = { upsert: true };
       const updatedData = {
         $set: {
+          userEmail: updateData.userEmail,
           available: updateData.available,
           bookingDate: updateData.bookingDate,
         },
