@@ -264,6 +264,20 @@ const run = async () => {
       const result = await hotelsRooms.updateOne(query, updatedData);
       res.send(result);
     });
+
+    // gallery page all room data get
+    app.get("/gallery", async (req, res) => {
+      const options = {
+        projection: {
+          name: 1,
+          description: 1,
+          image_url: 1,
+          amenities: 1,
+        },
+      };
+      const result = await hotelsRooms.find({}, options).toArray();
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log(
