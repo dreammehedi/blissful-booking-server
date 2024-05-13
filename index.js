@@ -36,21 +36,28 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// user verify tokens
-// const virifyUser = (req, res, next) => {
-//   const token = req.cookies.userToken;
-//   if (!token) {
-//     return res.status(401).send({ message: "UnAuthorized!" });
-//   }
+// custom middleware
+// logger
+const logger = (req, res, next) => {
+  console.log("Logger with: ", req.method, req.url);
+  next();
+};
 
-//   jwt.verify(token, process.env.USER_SECRET_TOKEN, (err, decode) => {
-//     if (err) {
-//       return res.status(403).send({ message: "Forbidden!" });
-//     }
-//     req.userTokenDecode = decode;
-//     next();
-//   });
-// };
+// verify token
+const verifyUserToken = (req, res, next) => {
+  const userToken = req.cookies.token;
+
+  if (!userToken) {
+    return res.status(401).send({ message: "UnAuthorized!" });
+  }
+  jwt.verify(userToken, process.env.USER_SECRET_TOKEN, (err, decode) => {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden!" });
+    }
+    req.userTokenDecode = decode;
+    next();
+  });
+};
 
 // create and app port
 const port = process.env.PORT || 5000;
@@ -86,24 +93,82 @@ const run = async () => {
     // get database of created database
     const hotelsRooms = client.db("RoomsDB").collection("allRoomsData");
     const hotelsUserReviews = client.db("RoomsDB").collection("userReviews");
+    const hotelMyBookings = client.db("RoomsDB").collection("myBookingRooms");
+
+    // available room data update
+    // app.patch("/room-booked/:roomId", async (req, res) => {
+    //   const roomId = req.params.roomId;
+    //   const updateData = req.body;
+    //   const query = { _id: new ObjectId(roomId) };
+    //   const options = { upsert: true };
+    //   const updatedData = {
+    //     $set: {
+    //       userEmail: updateData.userEmail,
+    //       available: updateData.available,
+    //       bookingDate: updateData.bookingDate,
+    //     },
+    //   };
+    //   const result = await hotelsRooms.updateOne(query, updatedData, options);
+    //   res.send(result);
+    // });
+
+    // booked room cancel
+    // app.patch("/cancel-booked-room/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const updateData = req.body;
+    //   const query = { _id: new ObjectId(id) };
+    //   const updatedData = {
+    //     $set: {
+    //       available: updateData.available,
+    //     },
+    //   };
+    //   const result = await hotelsRooms.updateOne(query, updatedData);
+    //   res.send(result);
+    // });
+
+    // update booked date
+    // app.patch("/update-booked-date/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const updateData = req.body;
+    //   console.log(id, updateData);
+    //   const query = { _id: new ObjectId(id) };
+    //   const updatedData = {
+    //     $set: {
+    //       bookingDate: updateData.bookingDate,
+    //     },
+    //   };
+    //   const result = await hotelsRooms.updateOne(query, updatedData);
+    //   res.send(result);
+    // });
+
+    // get my booked data
+    app.get("/my-booking-room", verifyUserToken, async (req, res) => {
+      if (req.query?.email !== req.userTokenDecode.email) {
+        return res.status(403).send({ message: "Forbiden!" });
+      }
+      const query = { userEmail: req.query.email };
+      const result = await hotelMyBookings.find(query).toArray();
+      res.send(result);
+    });
+    // // // // // // // // // // // // // // // // //
+    // Recheck all routes
 
     // authentication user token route
     app.post("/signin", async (req, res) => {
       const userEmail = req.body;
-
       // create a token with user email
-      const userToken = jwt.sign(userEmail, process.env.USER_SECRET_TOKEN, {
+      const token = jwt.sign(userEmail, process.env.USER_SECRET_TOKEN, {
         expiresIn: "20d",
       });
       res
-        .cookie("userToken", userToken, cookieOptions)
+        .cookie("token", token, cookieOptions)
         .send({ success: "User Sign In Success." });
     });
 
     // user signout clear cookies
     app.post("/signout", (req, res) => {
       res
-        .clearCookie("userToken", { ...cookieOptions, maxAge: 0 })
+        .clearCookie("token", { ...cookieOptions, maxAge: 0 })
         .send({ success: "User Signed Out Success." });
     });
 
@@ -144,33 +209,6 @@ const run = async () => {
       res.send(result);
     });
 
-    // user reviews routes
-    app.get("/userReviews", async (req, res) => {
-      // const result = await hotelsUserReviews
-      //   .aggregate([
-      //     {
-      //       $addFields: {
-      //         convertedTimestamp: { $toDate: "$timestamp" },
-      //       },
-      //     },
-      //     {
-      //       $sort: { convertedTimestamp: -1 },
-      //     },
-      //   ])
-      //   .toArray();
-
-      const result = await hotelsUserReviews
-        .find()
-        .sort({ timeStamp: -1 })
-        .toArray();
-      res.send(result);
-    });
-
-    app.post("/room-review", async (req, res) => {
-      const userReview = req.body;
-      const result = await hotelsUserReviews.insertOne(userReview);
-      res.send(result);
-    });
     // all available room data get
     app.get("/available-rooms", async (req, res) => {
       let query;
@@ -201,75 +239,10 @@ const run = async () => {
       res.send(result);
     });
 
-    // available room data update
-    app.patch("/room-booked/:roomId", async (req, res) => {
-      const roomId = req.params.roomId;
-      const updateData = req.body;
-      const query = { _id: new ObjectId(roomId) };
-      const options = { upsert: true };
-      const updatedData = {
-        $set: {
-          userEmail: updateData.userEmail,
-          available: updateData.available,
-          bookingDate: updateData.bookingDate,
-        },
-      };
-      const result = await hotelsRooms.updateOne(query, updatedData, options);
-      res.send(result);
-    });
-    // all available room count
-    // app.get("/available-rooms-count", async (req, res) => {
-    //   const query = { available: true };
-    //   const result = await hotelsRooms.countDocuments(query);
-    //   res.send({ count: result });
-    // });
-
-    // get data in database for user booked data
-    // app.post("/user-booked-rooms", async (req, res) => {
-    //   const ids = req.body;
-
-    //   const newObjectId = ids.map((id) => new ObjectId(id));
-    //   const query = {
-    //     _id: {
-    //       $in: newObjectId,
-    //     },
-    //   };
-    //   const result = await hotelsRooms.find(query).toArray();
-    //   res.send(result);
-    // });
-
-    app.post("/my-booking-room", async (req, res) => {
-      const userEmail = req.query.email;
-      const query = { userEmail: userEmail };
-      const result = await hotelsRooms.find(query).toArray();
-      res.send(result);
-    });
-
-    // update booked date
-    app.patch("/update-booked-date/:id", async (req, res) => {
-      const id = req.params.id;
-      const updateData = req.body;
-      const query = { _id: new ObjectId(id) };
-      const updatedData = {
-        $set: {
-          bookingDate: updateData.bookingDate,
-        },
-      };
-      const result = await hotelsRooms.updateOne(query, updatedData);
-      res.send(result);
-    });
-
-    // booked room cancel
-    app.patch("/cancel-booked-room/:id", async (req, res) => {
-      const id = req.params.id;
-      const updateData = req.body;
-      const query = { _id: new ObjectId(id) };
-      const updatedData = {
-        $set: {
-          available: updateData.available,
-        },
-      };
-      const result = await hotelsRooms.updateOne(query, updatedData);
+    // room booked in another collection
+    app.post("/my-booking", async (req, res) => {
+      let bookedData = req.body;
+      const result = await hotelMyBookings.insertOne(bookedData);
       res.send(result);
     });
 
@@ -286,8 +259,10 @@ const run = async () => {
       const result = await hotelsRooms.find({}, options).toArray();
       res.send(result);
     });
+    // // // // // // // // // // // // // // // // //
+
     // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
+    await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
