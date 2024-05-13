@@ -222,6 +222,13 @@ const run = async () => {
       res.send(result);
     });
 
+    app.delete("/my-booking/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await hotelMyBookings.deleteOne(query);
+      res.send(result);
+    });
+
     // get my booked data
     app.get("/my-booking-room", verifyUserToken, async (req, res) => {
       if (req.query?.email !== req.userTokenDecode.email) {
@@ -236,7 +243,6 @@ const run = async () => {
     app.patch("/update-booked-date/:id", async (req, res) => {
       const id = req.params.id;
       const updateData = req.body;
-      console.log(id, updateData);
       const query = { _id: new ObjectId(id) };
       const updatedData = {
         $set: {
