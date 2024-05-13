@@ -24,7 +24,12 @@ const app = express();
 // middleware for creating routes
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://blissful-bookings.surge.sh",
+      "https://blissful-bookings.web.app",
+      "https://blissful-bookings.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
