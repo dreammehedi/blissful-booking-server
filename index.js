@@ -126,30 +126,6 @@ const run = async () => {
     //   res.send(result);
     // });
 
-    // update booked date
-    // app.patch("/update-booked-date/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const updateData = req.body;
-    //   console.log(id, updateData);
-    //   const query = { _id: new ObjectId(id) };
-    //   const updatedData = {
-    //     $set: {
-    //       bookingDate: updateData.bookingDate,
-    //     },
-    //   };
-    //   const result = await hotelsRooms.updateOne(query, updatedData);
-    //   res.send(result);
-    // });
-
-    // get my booked data
-    app.get("/my-booking-room", verifyUserToken, async (req, res) => {
-      if (req.query?.email !== req.userTokenDecode.email) {
-        return res.status(403).send({ message: "Forbiden!" });
-      }
-      const query = { userEmail: req.query.email };
-      const result = await hotelMyBookings.find(query).toArray();
-      res.send(result);
-    });
     // // // // // // // // // // // // // // // // //
     // Recheck all routes
 
@@ -243,6 +219,31 @@ const run = async () => {
     app.post("/my-booking", async (req, res) => {
       let bookedData = req.body;
       const result = await hotelMyBookings.insertOne(bookedData);
+      res.send(result);
+    });
+
+    // get my booked data
+    app.get("/my-booking-room", verifyUserToken, async (req, res) => {
+      if (req.query?.email !== req.userTokenDecode.email) {
+        return res.status(403).send({ message: "Forbiden!" });
+      }
+      const query = { userEmail: req.query.email };
+      const result = await hotelMyBookings.find(query).toArray();
+      res.send(result);
+    });
+
+    // update booked date
+    app.patch("/update-booked-date/:id", async (req, res) => {
+      const id = req.params.id;
+      const updateData = req.body;
+      console.log(id, updateData);
+      const query = { _id: new ObjectId(id) };
+      const updatedData = {
+        $set: {
+          bookingDate: updateData.bookingDate,
+        },
+      };
+      const result = await hotelMyBookings.updateOne(query, updatedData);
       res.send(result);
     });
 
