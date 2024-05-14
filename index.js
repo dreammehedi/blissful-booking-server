@@ -38,10 +38,10 @@ app.use(cookieParser());
 
 // custom middleware
 // logger
-const logger = (req, res, next) => {
-  console.log("Logger with: ", req.method, req.url);
-  next();
-};
+// const logger = (req, res, next) => {
+//   console.log("Logger with: ", req.method, req.url);
+//   next();
+// };
 
 // verify token
 const verifyUserToken = (req, res, next) => {
@@ -89,7 +89,7 @@ const client = new MongoClient(uri, {
 // connect mongodb client
 const run = async () => {
   try {
-    await client.connect();
+    // await client.connect();
     // get database of created database
     const hotelsRooms = client.db("RoomsDB").collection("allRoomsData");
     const hotelsUserReviews = client.db("RoomsDB").collection("userReviews");
@@ -125,10 +125,10 @@ const run = async () => {
           description: 1,
           image_url: 1,
           price_per_night: 1,
-          avilable: 1,
+          available: 1,
         },
       };
-      const result = await hotelsRooms.find({}, options).limit(5).toArray();
+      const result = await hotelsRooms.find({}, options).limit(10).toArray();
       res.send(result);
     });
 
@@ -266,7 +266,7 @@ const run = async () => {
     // // // // // // // // // // // // // // // // //
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
