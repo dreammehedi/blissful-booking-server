@@ -142,6 +142,7 @@ const run = async () => {
           description: 1,
           image_url: 1,
           price_per_night: 1,
+          avilable: 1,
         },
       };
       const result = await hotelsRooms.find({}, options).limit(5).toArray();
