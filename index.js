@@ -252,7 +252,7 @@ const run = async () => {
 
     app.get("/room-review-count/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { mainRoomId: new ObjectId(id) };
+      const query = { mainRoomId: id };
       const result = await hotelsUserReviews.find(query).toArray();
       res.send(result);
     });
