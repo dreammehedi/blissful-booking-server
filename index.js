@@ -95,23 +95,6 @@ const run = async () => {
     const hotelsUserReviews = client.db("RoomsDB").collection("userReviews");
     const hotelMyBookings = client.db("RoomsDB").collection("myBookingRooms");
 
-    // available room data update
-    // app.patch("/room-booked/:roomId", async (req, res) => {
-    //   const roomId = req.params.roomId;
-    //   const updateData = req.body;
-    //   const query = { _id: new ObjectId(roomId) };
-    //   const options = { upsert: true };
-    //   const updatedData = {
-    //     $set: {
-    //       userEmail: updateData.userEmail,
-    //       available: updateData.available,
-    //       bookingDate: updateData.bookingDate,
-    //     },
-    //   };
-    //   const result = await hotelsRooms.updateOne(query, updatedData, options);
-    //   res.send(result);
-    // });
-
     // // // // // // // // // // // // // // // // //
     // Recheck all routes
 
@@ -251,6 +234,19 @@ const run = async () => {
         },
       };
       const result = await hotelsRooms.updateOne(query, updatedData);
+      res.send(result);
+    });
+
+    // room review get
+    app.get("/room-review", async (req, res) => {
+      const result = await hotelsUserReviews.find().toArray();
+      res.send(result);
+    });
+
+    // room review post
+    app.post("/room-review", async (req, res) => {
+      const reviewData = req.body;
+      const result = await hotelsUserReviews.insertOne(reviewData);
       res.send(result);
     });
 
