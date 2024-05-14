@@ -46,7 +46,6 @@ app.use(cookieParser());
 // verify token
 const verifyUserToken = (req, res, next) => {
   const userToken = req.cookies.token;
-
   if (!userToken) {
     return res.status(401).send({ message: "UnAuthorized!" });
   }
@@ -200,10 +199,10 @@ const run = async () => {
     });
 
     // get my booked data
-    app.get("/my-booking-room", async (req, res) => {
-      // if (req.query?.email !== req.userTokenDecode.email) {
-      //   return res.status(403).send({ message: "Forbiden!" });
-      // }
+    app.get("/my-booking-room", verifyUserToken, async (req, res) => {
+      if (req.query?.email !== req.userTokenDecode.email) {
+        return res.status(403).send({ message: "Forbiden!" });
+      }
       const query = { userEmail: req.query.email };
       const result = await hotelMyBookings.find(query).toArray();
       res.send(result);
