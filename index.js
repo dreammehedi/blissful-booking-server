@@ -250,6 +250,12 @@ const run = async () => {
       res.send(result);
     });
 
+    app.get("/room-review-count/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { mainRoomId: new ObjectId(id) };
+      const result = await hotelsUserReviews.find(query).toArray();
+      res.send(result);
+    });
     // gallery page all room data get
     app.get("/gallery", async (req, res) => {
       const options = {
