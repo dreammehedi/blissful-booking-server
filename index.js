@@ -200,10 +200,10 @@ const run = async () => {
     });
 
     // get my booked data
-    app.get("/my-booking-room", verifyUserToken, async (req, res) => {
-      if (req.query?.email !== req.userTokenDecode.email) {
-        return res.status(403).send({ message: "Forbiden!" });
-      }
+    app.get("/my-booking-room", async (req, res) => {
+      // if (req.query?.email !== req.userTokenDecode.email) {
+      //   return res.status(403).send({ message: "Forbiden!" });
+      // }
       const query = { userEmail: req.query.email };
       const result = await hotelMyBookings.find(query).toArray();
       res.send(result);
@@ -239,7 +239,11 @@ const run = async () => {
 
     // room review get
     app.get("/room-review", async (req, res) => {
-      const result = await hotelsUserReviews.find().toArray();
+      const result = await hotelsUserReviews
+        .find()
+        .sort({ timeStamp: -1 })
+        .toArray();
+
       res.send(result);
     });
 
