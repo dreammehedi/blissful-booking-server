@@ -112,20 +112,6 @@ const run = async () => {
     //   res.send(result);
     // });
 
-    // booked room cancel
-    // app.patch("/cancel-booked-room/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const updateData = req.body;
-    //   const query = { _id: new ObjectId(id) };
-    //   const updatedData = {
-    //     $set: {
-    //       available: updateData.available,
-    //     },
-    //   };
-    //   const result = await hotelsRooms.updateOne(query, updatedData);
-    //   res.send(result);
-    // });
-
     // // // // // // // // // // // // // // // // //
     // Recheck all routes
 
@@ -250,6 +236,20 @@ const run = async () => {
         },
       };
       const result = await hotelMyBookings.updateOne(query, updatedData);
+      res.send(result);
+    });
+
+    // booked room available update after room booked success
+    app.patch("/update-booking-available/:id", async (req, res) => {
+      const id = req.params.id;
+      const updateData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updatedData = {
+        $set: {
+          available: updateData.available,
+        },
+      };
+      const result = await hotelsRooms.updateOne(query, updatedData);
       res.send(result);
     });
 
