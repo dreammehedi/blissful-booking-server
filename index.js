@@ -156,18 +156,21 @@ const run = async () => {
 
     // all available room data get
     app.get("/available-rooms", async (req, res) => {
-      let query;
+      ``;
+      // available unavailable data
+      const roomStatus = req.query.availableUnavailable === "true";
+
       // get price range
       const priceRange = parseInt(req.query.priceRange);
-
+      let query;
       if (priceRange) {
         query = {
-          available: true,
+          available: roomStatus,
           price_per_night: { $lte: priceRange },
         };
       } else {
         query = {
-          available: true,
+          available: roomStatus,
         };
       }
 
