@@ -157,6 +157,8 @@ const run = async () => {
     // all available room data get
     app.get("/available-rooms", async (req, res) => {
       ``;
+
+      const location = req.query.location;
       // available unavailable data
       const roomStatus = req.query.availableUnavailable === "true";
 
@@ -168,6 +170,11 @@ const run = async () => {
           available: roomStatus,
           price_per_night: { $lte: priceRange },
         };
+      } else if (location) {
+        query = {
+          available: roomStatus,
+          location: location,
+        };
       } else {
         query = {
           available: roomStatus,
@@ -177,6 +184,7 @@ const run = async () => {
       const options = {
         projection: {
           name: 1,
+          location: 1,
           description: 1,
           image_url: 1,
           price_per_night: 1,
